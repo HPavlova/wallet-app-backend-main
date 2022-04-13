@@ -1,0 +1,535 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "version": "1.0.0",
+    "title": "Wallet backend",
+    "description": "Wallet backend documentation",
+    "license": {
+      "name": "MIT",
+      "url": "https://opensource.org/licenses/MIT"
+    }
+  },
+  "servers": [
+    { "url": "http://localhost:8080" },
+    { "url": "https://wallet-app-backend-gr10.herokuapp.com/" }
+  ],
+  "tags": [
+    {
+      "name": "Auth",
+      "description": "Authorization endpoints"
+    },
+    {
+      "name": "Transaction",
+      "description": "Transaction endpoints"
+    }
+  ],
+  "paths": {
+    "/api/auth/register": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "User registration",
+        "parameters": [],
+        "requestBody": {
+          "description": "Registration's object",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegistrationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Registration successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RegistrationResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request (invalid request body)",
+            "content": {}
+          },
+          "409": {
+            "description": "Provided email already exists",
+            "content": {}
+          }
+        }
+      }
+    },
+    "/api/auth/login": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "User login",
+        "parameters": [],
+        "requestBody": {
+          "description": "Login object",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request (invalid request body)",
+            "content": {}
+          },
+          "401": {
+            "description": "Email or password is wrong",
+            "content": {}
+          }
+        }
+      }
+    },
+    "/api/auth/current": {
+      "get": {
+        "tags": ["Auth"],
+        "summary": "User current",
+        "parameters": [],
+        "security": [{ "Bearer": [] }],
+        "responses": {
+          "201": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authorized",
+            "content": {}
+          }
+        }
+      }
+    },
+    "/api/auth/logout": {
+      "get": {
+        "tags": ["Auth"],
+        "summary": "User logout",
+        "parameters": [],
+        "security": [{ "Bearer": [] }],
+        "responses": {
+          "204": {
+            "description": "Successful operation"
+          },
+          "401": {
+            "description": "Invalid token",
+            "content": {}
+          }
+        }
+      }
+    },
+    "/api/transaction": {
+      "get": {
+        "tags": ["Transaction"],
+        "summary": "User transactions",
+        "parameters": [],
+        "security": [{ "Bearer": [] }],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TransactionsGetResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authorized",
+            "content": {}
+          }
+        }
+      }
+    },
+    "/api/transaction/add": {
+      "post": {
+        "tags": ["Transaction"],
+        "summary": "Add transactions",
+        "security": [{ "Bearer": [] }],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TransactionsAddRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TransactionsAddResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {}
+          },
+          "500": {
+            "description": "Iternal Server Error",
+            "content": {}
+          }
+        }
+      }
+    },
+    "/api/transaction/{id}": {
+      "delete": {
+        "tags": ["Transaction"],
+        "summary": "User delete transaction",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": [{ "Bearer": [] }],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TransactionDeleteResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request (invalid request body)",
+            "content": {}
+          },
+          "401": {
+            "description": "Not authorized",
+            "content": {}
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "RegistrationRequest": {
+        "type": "object",
+        "required": ["email", "password", "name"],
+        "properties": {
+          "email": {
+            "type": "string",
+            "description": "User's email",
+            "format": "email"
+          },
+          "password": {
+            "type": "string",
+            "minLength": 6,
+            "maxLength": 12,
+            "description": "User's password",
+            "example": "qwerty123"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 12,
+            "description": "User's name",
+            "example": "Mike"
+          }
+        }
+      },
+      "RegistrationResponse": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "description": "Registration successful"
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "token": {
+                "type": "string",
+                "description": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYyMGI5YTIwMDc0YjQyOTE4ZmFjZmUxYSIsImlhdCI6MTY0NDkyODA1MCwiZXhwIjoxNjQ0OTI5ODUwfQ.m2SwgVqZNJOYo6CVRn3JPu2oWlS4eN5oVlsDuKByLZ8"
+              },
+              "user": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "example": "Bismark@gmail.com"
+                  },
+                  "name": {
+                    "type": "string",
+                    "example": "Otto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "example": {
+          "message": "Registration successful",
+          "data": {
+            "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYyMGI5YTIwMDc0YjQyOTE4ZmFjZmUxYSIsImlhdCI6MTY0NDkyODA1MCwiZXhwIjoxNjQ0OTI5ODUwfQ.m2SwgVqZNJOYo6CVRn3JPu2oWlS4eN5oVlsDuKByLZ8",
+            "user": { "email": "d.snata@gmail.com", "name": "Daniela" }
+          }
+        }
+      },
+      "LoginRequest": {
+        "type": "object",
+        "required": ["email", "password"],
+        "properties": {
+          "email": {
+            "type": "string",
+            "description": "User's email",
+            "format": "email"
+          },
+          "password": {
+            "type": "string",
+            "minLength": 6,
+            "maxLength": 12,
+            "description": "User's password",
+            "example": "qwerty123"
+          }
+        }
+      },
+      "LoginResponse": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string",
+            "description": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYyMGI5YTIwMDc0YjQyOTE4ZmFjZmUxYSIsImlhdCI6MTY0NDkyODA1MCwiZXhwIjoxNjQ0OTI5ODUwfQ.m2SwgVqZNJOYo6CVRn3JPu2oWlS4eN5oVlsDuKByLZ8"
+          },
+          "user": {
+            "type": "object",
+            "properties": {
+              "email": {
+                "type": "string",
+                "example": "Bismark@gmail.com"
+              },
+              "name": {
+                "type": "string",
+                "example": "Otto"
+              },
+              "balance": {
+                "type": "number",
+                "example": "1.00"
+              }
+            }
+          }
+        },
+        "example": {
+          "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYyMGI5YTIwMDc0YjQyOTE4ZmFjZmUxYSIsImlhdCI6MTY0NDkyODA1MCwiZXhwIjoxNjQ0OTI5ODUwfQ.m2SwgVqZNJOYo6CVRn3JPu2oWlS4eN5oVlsDuKByLZ8",
+          "user": {
+            "email": "d.snata@gmail.com",
+            "name": "Daniela",
+            "balance": "1.00"
+          }
+        }
+      },
+      "TransactionsAddResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "description": "responses status"
+          },
+          "code": {
+            "type": "string",
+            "description": "responses code"
+          },
+          "data": {
+            "type": "object",
+            "description": "responses data"
+          }
+        },
+        "example": {
+          "date": "16338784",
+          "month": 12,
+          "year": 2020,
+          "typeTransaction": "+",
+          "category": "Regular income",
+          "commentary": "Sallary per month",
+          "amountTransaction": 1000
+        }
+      },
+      "TransactionsAddRequest": {
+        "type": "object",
+        "required": [
+          "date",
+          "month",
+          "year",
+          "category",
+          "amountTransaction",
+          "typeTransaction",
+          "commentary",
+          "balance"
+        ],
+        "properties": {
+          "date": {
+            "type": "string",
+            "description": "date"
+          },
+          "month": {
+            "type": "number",
+            "description": "month"
+          },
+          "year": {
+            "type": "number",
+            "description": "year"
+          },
+          "category": {
+            "type": "string",
+            "description": "category"
+          },
+          "commentary": {
+            "type": "string",
+            "description": "commentary"
+          },
+          "amountTransaction": {
+            "type": "number",
+            "description": "amountTransaction"
+          },
+          "typeTransaction": {
+            "type": "string",
+            "description": "typeTransaction"
+          }
+        },
+        "example": {
+          "date": "16338784",
+          "month": 12,
+          "year": 2020,
+          "category": "Regular income",
+          "commentary": "Sallary per month",
+          "amountTransaction": 1000,
+          "typeTransaction": "+"
+        }
+      },
+      "TransactionsGetResponse": {
+        "type": "object",
+        "properties": {
+          "transactions": {
+            "type": "object",
+            "properties": {
+              "_id": {
+                "type": "string",
+                "example": "1234567"
+              },
+              "typeTransaction": {
+                "type": "string",
+                "example": "+"
+              },
+              "category": {
+                "type": "string",
+                "example": "Income"
+              },
+              "сommentary": {
+                "type": "string",
+                "description": "Regular income"
+              },
+              "amountTransaction": {
+                "type": "number",
+                "example": "1.00"
+              },
+              "balance": {
+                "type": "number",
+                "example": "1.00"
+              }
+            }
+          }
+        },
+        "example": {
+          "transactions": {
+            "_id": "1234567",
+            "typeTransaction": "+",
+            "category": "Income",
+            "сommentary": "Regular income",
+            "amountTransaction": "1.00",
+            "balance": "1.00"
+          }
+        }
+      },
+      "TransactionDeleteResponse": {
+        "type": "object",
+        "properties": {
+          "transactions": {
+            "type": "object",
+            "properties": {
+              "_id": {
+                "type": "string",
+                "example": "1234567"
+              },
+              "typeTransaction": {
+                "type": "string",
+                "example": "+"
+              },
+              "category": {
+                "type": "string",
+                "example": "Income"
+              },
+              "сommentary": {
+                "type": "string",
+                "description": "Regular income"
+              },
+              "amountTransaction": {
+                "type": "number",
+                "example": "1.00"
+              },
+              "balance": {
+                "type": "number",
+                "example": "1.00"
+              }
+            }
+          }
+        },
+        "example": {
+          "transactions": {
+            "_id": "1234567",
+            "typeTransaction": "+",
+            "category": "Income",
+            "сommentary": "Regular income",
+            "amountTransaction": "1.00",
+            "balance": "1.00"
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "Bearer": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  }
+}
